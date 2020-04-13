@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- service-account.yaml
+- role-binding.yaml
+- task.yaml
+- pipeline.yaml
+namespace: kubeflow-fairing
+# Create a configMap containing the template for the pipeline run
+configMapGenerator:
+- name: pipelinerun-template
+  files:
+    # key will be name of the file
+    - ./config/app-pipeline.template.yaml

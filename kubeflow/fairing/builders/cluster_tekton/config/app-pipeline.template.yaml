@@ -1,0 +1,24 @@
+# This is a template used for generating PipelineRuns for
+# individual applications at specific commits.
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineRun
+metadata:
+  # Generate a unique name for each run
+  generateName: ci-profile-controller-
+spec:
+  pipelineRef:
+    name: ci-pipeline
+  params:  
+  - name: "path_to_context"
+    value: "/build/contextfile"
+  - name: "path_to_docker_file"
+    value: "/build/dockerfile"
+  resources:
+  # The image we want to build
+  - name:  builtImage
+    resourceSpec:
+      type: image
+      params:
+      - name: url  
+        value: fairing-job-
+  serviceAccountName: ci-pipeline-run-service-account

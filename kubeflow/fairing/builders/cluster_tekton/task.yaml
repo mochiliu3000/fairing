@@ -1,0 +1,41 @@
+# TODO(jlewi): We should probably split this into two tasks now; one for building the image
+# and one for updating the image. Now that we know the URL of the image we no longer need to pass along
+# the digest between the steps using a volume mounted pod.
+apiVersion: tekton.dev/v1alpha1
+kind: Task
+metadata:
+  name: build-push
+  annotations:
+    # This gets passed down to the individual pods
+    sidecar.istio.io/inject: "false"
+spec:
+  inputs:
+    params:
+    - description: The name of the build context used by Kaniko
+      name: context_file_name
+      type: string
+    - description: The name of the dockerfile to build
+      name: docker_file_name
+      type: string
+    resources:
+    - name: builtImage
+      type: image
+  steps:
+  - name: build-push
+    image: gcr.io/kaniko-project/executor:v0.14.0
+    command:
+    - /kaniko/executor
+    - --dockerfile=/build/$(inputs.params.docker_file_name)
+    - --context=/build/$(inputs.params.context_file_name)
+    - --destination=$(inputs.resources.builtImage.url)
+    resources:
+      requests:
+        cpu: 7
+        memory: 16Gi
+    volumeMounts:
+    - mountPath: /build
+      name: build-context
+  volumes:
+  - name: build-context
+    persistentVolumeClaim:
+      claimName: build-context-pv-claim

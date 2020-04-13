@@ -1,0 +1,30 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Pipeline
+metadata:
+  name: ci-pipeline
+spec:
+  params:
+  - description: The name of the build context used by Kaniko
+    name: context_file_name
+    type: string
+    default: ""
+  - description: The name of the dockerfile to build
+    name: docker_file_name
+    type: string
+    default: ""
+  resources:
+  - name: builtImage
+    type: image
+  tasks:
+  - name: build-push
+    params:
+    - name: context_file_name
+      value: "$(params.context_file_name)"
+    - name: docker_file_name
+      value: "$(params.docker_file_name)"
+    resources:
+    - name: builtImage
+      type: image
+    taskRef:
+      name: build-push
+      kind: namespaced
