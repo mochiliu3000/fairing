@@ -1,0 +1,25 @@
+# TODO(mochiliu3000): Have to upload context and dockerfile to PV for building
+# Use local to set nodeAffinity: https://kubernetes.io/docs/concepts/storage/volumes/#local
+# Need to create /tmp/fairing-build on target node in advance
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: fairing-build-pv
+spec:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: local-storage
+  local:
+    path: /tmp/fairing-build
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - mochios-worker-5.fyre.ibm.com
