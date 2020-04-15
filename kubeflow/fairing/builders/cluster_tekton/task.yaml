@@ -1,6 +1,32 @@
-# TODO(jlewi): We should probably split this into two tasks now; one for building the image
-# and one for updating the image. Now that we know the URL of the image we no longer need to pass along
-# the digest between the steps using a volume mounted pod.
+# TODO(mochiliu3000): As Tekton task is runing in container, to make it easy for now, 
+# we assume fairing has already generated context and dockerfile, 
+# we then trigger the following tekton task to build and push image
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: fairing-build-pvc
+spec:
+  storageClassName: local-storage
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: fairing-build-push-kaniko
+spec:
+  type: image
+  params:
+  - name: url
+    value: index.docker.io/mochiliu3000/fairing-job:tekton
+
+---
+
 apiVersion: tekton.dev/v1alpha1
 kind: Task
 metadata:
@@ -11,31 +37,69 @@ metadata:
 spec:
   inputs:
     params:
-    - description: The name of the build context used by Kaniko
-      name: context_file_name
+    - description: The sub directory of the build context used by Kaniko
+      name: context_sub_dir
       type: string
-    - description: The name of the dockerfile to build
-      name: docker_file_name
+    - description: The sub directory of the dockerfile to build
+      name: dockerfile_sub_dir
       type: string
+  outputs:
     resources:
     - name: builtImage
       type: image
+  # https://github.com/tektoncd/pipeline/blob/release-v0.10.x/examples/taskruns/workspace.yaml
+  workspaces:
+  - name: fairing-build
+    description: fairing build files
+    mountPath: /workspace/fairing-build
+  - name: docker-config
+    description: docker config file
+    mountPath: /kaniko/.docker
   steps:
   - name: build-push
     image: gcr.io/kaniko-project/executor:v0.14.0
+    # image: ubuntu
+    env:
+    - name: "DOCKER_CONFIG"
+      value: $(workspaces.docker-config.path)
+    # https://github.com/GoogleContainerTools/kaniko/tree/v0.14.0#kaniko-build-contexts
     command:
     - /kaniko/executor
-    - --dockerfile=/build/$(inputs.params.docker_file_name)
-    - --context=/build/$(inputs.params.context_file_name)
-    - --destination=$(inputs.resources.builtImage.url)
+    - --dockerfile=$(workspaces.fairing-build.path)/$(inputs.params.dockerfile_sub_dir)
+    - --context=dir://$(workspaces.fairing-build.path)/$(inputs.params.context_sub_dir)
+    - --destination=$(outputs.resources.builtImage.url)
+    # script: cat $(workspaces.docker-config.path)/config.json
+    requests:
+      cpu: 2
+      memory: 4Gi
+
+---
+
+apiVersion: tekton.dev/v1alpha1
+kind: TaskRun
+metadata:
+  name: build-push
+spec:
+  taskRef:
+    name: build-push
+  inputs:
+    params:
+    - name: context_sub_dir
+      value: "build1"
+    - name: dockerfile_sub_dir
+      value: "build1/Dockerfile"
+  outputs:
     resources:
-      requests:
-        cpu: 7
-        memory: 16Gi
-    volumeMounts:
-    - mountPath: /build
-      name: build-context
-  volumes:
-  - name: build-context
-    persistentVolumeClaim:
-      claimName: build-context-pv-claim
+    - name: builtImage
+      resourceRef:
+        name: fairing-build-push-kaniko
+  workspaces:
+    - name: fairing-build
+      persistentVolumeClaim:
+        claimName: fairing-build-pvc
+    - name: docker-config
+      configMap:
+        name: docker-config
+        items:
+          - key: config.json
+            path: config.json
