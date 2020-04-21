@@ -16,23 +16,10 @@ spec:
 ---
 
 apiVersion: tekton.dev/v1alpha1
-kind: PipelineResource
-metadata:
-  name: fairing-build-push-kaniko
-spec:
-  type: image
-  params:
-  - name: url
-    value: index.docker.io/mochiliu3000/fairing-job:tekton
-
----
-
-apiVersion: tekton.dev/v1alpha1
 kind: Task
 metadata:
-  name: build-push
+  name: fairing-build-push
   annotations:
-    # This gets passed down to the individual pods
     sidecar.istio.io/inject: "false"
 spec:
   inputs:
@@ -56,9 +43,8 @@ spec:
     description: docker config file
     mountPath: /kaniko/.docker
   steps:
-  - name: build-push
+  - name: fairing-build-push
     image: gcr.io/kaniko-project/executor:v0.14.0
-    # image: ubuntu
     env:
     - name: "DOCKER_CONFIG"
       value: $(workspaces.docker-config.path)
@@ -68,38 +54,37 @@ spec:
     - --dockerfile=$(workspaces.fairing-build.path)/$(inputs.params.dockerfile_sub_dir)
     - --context=dir://$(workspaces.fairing-build.path)/$(inputs.params.context_sub_dir)
     - --destination=$(outputs.resources.builtImage.url)
-    # script: cat $(workspaces.docker-config.path)/config.json
     requests:
       cpu: 2
       memory: 4Gi
 
----
+# ---
 
-apiVersion: tekton.dev/v1alpha1
-kind: TaskRun
-metadata:
-  name: build-push
-spec:
-  taskRef:
-    name: build-push
-  inputs:
-    params:
-    - name: context_sub_dir
-      value: "build1"
-    - name: dockerfile_sub_dir
-      value: "build1/Dockerfile"
-  outputs:
-    resources:
-    - name: builtImage
-      resourceRef:
-        name: fairing-build-push-kaniko
-  workspaces:
-    - name: fairing-build
-      persistentVolumeClaim:
-        claimName: fairing-build-pvc
-    - name: docker-config
-      configMap:
-        name: docker-config
-        items:
-          - key: config.json
-            path: config.json
+# apiVersion: tekton.dev/v1alpha1
+# kind: TaskRun
+# metadata:
+#   name: fairing-build-push
+# spec:
+#   taskRef:
+#     name: fairing-build-push
+#   inputs:
+#     params:
+#     - name: context_sub_dir
+#       value: "build1"
+#     - name: dockerfile_sub_dir
+#       value: "build1/Dockerfile"
+#   outputs:
+#     resources:
+#     - name: builtImage
+#       resourceRef:
+#         name: fairing-build-push-kaniko
+#   workspaces:
+#     - name: fairing-build
+#       persistentVolumeClaim:
+#         claimName: fairing-build-pvc
+#     - name: docker-config
+#       configMap:
+#         name: docker-config
+#         items:
+#           - key: config.json
+#             path: config.json

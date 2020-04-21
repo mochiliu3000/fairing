@@ -1,0 +1,45 @@
+# Trigger after build-push, make sure to provide remote kube config
+apiVersion: tekton.dev/v1alpha1
+kind: Task
+metadata:
+  name: fairing-job-deploy
+  annotations:
+    sidecar.istio.io/inject: "false"
+spec:
+  inputs:
+    resources:
+    - name: builtImage
+      type: image
+    - name: remote_kubeconfig
+      type: cluster
+  steps:
+  - name: fairing-job-deploy
+    image: bitnami/kubectl:1.18
+    command: ["bash"]
+    args:
+    - "-c"
+    - "kubectl --kubeconfig /workspace/$(inputs.resources.remote_kubeconfig.name)/kubeconfig get pod"   
+    # Need to use root as kubeconfig created has mode 600
+    securityContext:
+      runAsUser: 0
+    requests:
+      cpu: 1
+      memory: 2Gi
+
+# ---
+
+# apiVersion: tekton.dev/v1alpha1
+# kind: TaskRun
+# metadata:
+#   name: fairing-job-deploy
+# spec:
+#   taskRef:
+#     name: fairing-job-deploy
+#   inputs:
+#     resources:
+#     - name: builtImage
+#       resourceRef:
+#         name: fairing-build-push-kaniko
+#     - name: remote_kubeconfig
+#       resourceRef:
+#         name: fairing-deploy-kube-config

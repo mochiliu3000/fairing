@@ -1,0 +1,47 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  generateName: fairing-job-
+  labels:
+    fairing-deployer: job
+    fairing-id: e13c1e32-6da6-11ea-a3db-35d5c66d72a2
+  name: fairing-job
+  namespace: tk
+spec:
+  backoffLimit: 0
+  completions: 1
+  parallelism: 1
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+      creationTimestamp: null
+      labels:
+        fairing-deployer: job
+        fairing-id: e13c1e32-6da6-11ea-a3db-35d5c66d72a2
+        job-name: fairing-job
+      name: fairing-deployer
+    spec:
+      containers:
+      - command:
+        - bash
+        - -c 
+        - 'pip install boto3 && python main_minio.py'
+        env:
+        - name: FAIRING_RUNTIME
+          value: "1"
+        image: index.docker.io/mochiliu3000/fairing-job:tekton
+        imagePullPolicy: IfNotPresent
+        name: fairing-job
+        # Need to use root to run pip install
+        securityContext:
+          runAsUser: 0
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        workingDir: /app/
+      dnsPolicy: ClusterFirst
+      restartPolicy: Never
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30

@@ -1,0 +1,38 @@
+# This is a template used for generating PipelineRuns for
+# individual applications at specific commits.
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineRun
+metadata:
+  # Generate a unique name for each run
+  generateName: fairing-build-deploy-pipeline-
+spec:
+  pipelineRef:
+    name: fairing-build-deploy-pipeline
+  params:  
+  - name: "context_sub_dir"
+    value: "build1"
+  - name: "dockerfile_sub_dir"
+    value: "build1/Dockerfile"
+  resources:
+  # The image and cluster resources that will be used
+  - name: builtImage
+    resourceSpec:    
+      type: image
+      resourceRef:
+        name: fairing-build-push-kaniko
+  - name:  remote_kubeconfig
+    resourceSpec:
+      type: cluster
+      resourceRef:
+        name: fairing-deploy-kube-config
+  workspaces:
+  # The workspaces that will be used
+  - name: fairing-build
+    persistentVolumeClaim:
+      claimName: fairing-build-pvc
+  - name: docker-config
+    configMap:
+      name: docker-config
+      items:
+        - key: config.json
+          path: config.json

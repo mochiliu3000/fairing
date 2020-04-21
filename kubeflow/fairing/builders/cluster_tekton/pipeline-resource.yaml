@@ -1,0 +1,28 @@
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: fairing-build-push-kaniko
+spec:
+  type: image
+  params:
+  - name: url
+    value: index.docker.io/mochiliu3000/fairing-job:tekton
+
+---
+
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: fairing-deploy-kube-config
+spec:
+  type: cluster
+  params:
+  - name: url
+    value: https://9.30.210.247:8443
+  - name: insecure
+    value: "true"
+  - name: username
+    value: ocadmin/9.30.210.247:8443
+    # TODO(mochiliu3000): it is insecure to directly use token here, use secret instead
+  - name: token
+    value: RxsA-8m598pfS_5IgFsupcdGFVnBx_f4_VABtsdyhaI
