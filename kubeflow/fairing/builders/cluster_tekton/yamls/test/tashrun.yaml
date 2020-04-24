@@ -1,0 +1,46 @@
+apiVersion: tekton.dev/v1alpha1
+kind: TaskRun
+metadata:
+  name: fairing-build-push
+spec:
+  taskRef:
+    name: fairing-build-push
+  inputs:
+    params:
+    - name: context_sub_dir
+      value: "build1"
+    - name: dockerfile_sub_dir
+      value: "build1/Dockerfile"
+  outputs:
+    resources:
+    - name: builtImage
+      resourceRef:
+        name: fairing-build-push-kaniko
+  workspaces:
+    - name: fairing-build
+      persistentVolumeClaim:
+        claimName: fairing-build-pvc
+    - name: docker-config
+      configMap:
+        name: docker-config
+        items:
+          - key: config.json
+            path: config.json
+
+---
+
+apiVersion: tekton.dev/v1alpha1
+kind: TaskRun
+metadata:
+  name: fairing-job-deploy
+spec:
+  taskRef:
+    name: fairing-job-deploy
+  inputs:
+    resources:
+    - name: builtImage
+      resourceRef:
+        name: fairing-build-push-kaniko
+    - name: remote_kubeconfig
+      resourceRef:
+        name: fairing-deploy-kube-config

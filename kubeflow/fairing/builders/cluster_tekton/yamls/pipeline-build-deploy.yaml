@@ -23,9 +23,9 @@ spec:
   workspaces:
    # Workspace has 1 volume and 1 configMap to mount
    # fairing-build - Mounted workspace to store build Kanico context and Dockerfile
-   # docker-config - Mounted configMap of user's docker config for image push
-  - name: fairing-build # TODO
-  - name: docker-config # TODO
+   # docker-registry-config - Mounted configMap of user's docker config for image push
+  - name: fairing-build
+  - name: docker-registry-config
   tasks:
   - name: fairing-build-push
     params:
@@ -36,10 +36,12 @@ spec:
     resources:
       outputs:
       - name: builtImage
-        resource: builtImage # TODO
+        resource: builtImage
     workspaces:
-      - name: fairing-build # TODO
-      - name: docker-config # TODO
+      - name: fairing-build
+        workspace: fairing-build
+      - name: docker-registry-config
+        workspace: docker-registry-config
     taskRef:
       name: fairing-build-push
       kind: namespaced
@@ -49,9 +51,9 @@ spec:
     resources:
       inputs:
       - name: builtImage
-        resource: builtImage # TODO
+        resource: builtImage
       - name: remote_kubeconfig
-        resource: remote_kubeconfig # TODO
+        resource: remote_kubeconfig
     taskRef:
       name: fairing-job-deploy
       kind: namespaced

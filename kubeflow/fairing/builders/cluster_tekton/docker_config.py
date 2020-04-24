@@ -4,7 +4,7 @@ from kubernetes.client.rest import ApiException
 from os.path import expanduser
 
 namespace = 'tk'
-docker_cm_name = 'docker-config'
+docker_cm_name = 'docker-registry-config'
 
 config.load_kube_config()
 api_instance = client.CoreV1Api()

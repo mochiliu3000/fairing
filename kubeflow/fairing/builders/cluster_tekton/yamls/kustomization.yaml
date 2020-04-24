@@ -1,0 +1,26 @@
+# https://kubectl.docs.kubernetes.io/pages/reference/kustomize.html
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: tk
+resources:
+- task-build-push.yaml
+- task-job-deploy.yaml
+- pipeline-build-deploy.yaml
+# TODO
+images:
+  - name: 
+    newName: 
+    newTag:
+configMapGenerator:
+# Create configMaps containing the template for the pipeline run and docker config
+- name: fairing-build-deploy-pipeline-config
+  files:
+    # key will be name of the file
+    - ./config/pipelineresource.template.yaml
+    - ./config/pipelinerun.template.yaml
+- name: docker-registry-config
+  files:
+    - ./config/config.json
+generatorOptions:
+# Generate ConfigMaps without hash-suffixes
+  disableNameSuffixHash: true

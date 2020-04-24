@@ -23,23 +23,5 @@ spec:
     securityContext:
       runAsUser: 0
     requests:
-      cpu: 1
-      memory: 2Gi
-
-# ---
-
-# apiVersion: tekton.dev/v1alpha1
-# kind: TaskRun
-# metadata:
-#   name: fairing-job-deploy
-# spec:
-#   taskRef:
-#     name: fairing-job-deploy
-#   inputs:
-#     resources:
-#     - name: builtImage
-#       resourceRef:
-#         name: fairing-build-push-kaniko
-#     - name: remote_kubeconfig
-#       resourceRef:
-#         name: fairing-deploy-kube-config
+      cpu: 2
+      memory: 4Gi

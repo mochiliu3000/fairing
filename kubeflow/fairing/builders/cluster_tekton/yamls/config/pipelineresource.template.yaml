@@ -25,4 +25,4 @@ spec:
     value: ocadmin/9.30.210.247:8443
     # TODO(mochiliu3000): it is insecure to directly use token here, use secret instead
   - name: token
-    value: RxsA-8m598pfS_5IgFsupcdGFVnBx_f4_VABtsdyhaI
+    value: 0Qj_wgneVXYF2zA4Mc_WNg1zLINCsNwM15QecAshffA
