@@ -6,7 +6,7 @@ spec:
   type: image
   params:
   - name: url
-    value: index.docker.io/mochiliu3000/fairing-job:tekton
+    value: fairing-job-image
 
 ---
 

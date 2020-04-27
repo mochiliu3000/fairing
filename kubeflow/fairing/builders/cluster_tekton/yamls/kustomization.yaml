@@ -6,18 +6,23 @@ resources:
 - task-build-push.yaml
 - task-job-deploy.yaml
 - pipeline-build-deploy.yaml
-# TODO
+- config/fairing-job-template.yaml
+- config/pipelineresource-template.yaml
+configurations:
+- kustomize-config.yaml
+commonLabels:
+  fairing-deployer: job
+  fairing-id: e13c1e32-6da6-11ea-a3db-35d5c66d72a2
 images:
-  - name: 
-    newName: 
-    newTag:
+# Replace image name in fairing-job-template.yaml and pipelineresource.yaml
+- name: fairing-job-image
+  newName: index.docker.io/mochiliu3000/fairing-job:test
 configMapGenerator:
-# Create configMaps containing the template for the pipeline run and docker config
+# Create configMaps containing the template for pipelinerun and docker config
+# Key will be name of the file
 - name: fairing-build-deploy-pipeline-config
   files:
-    # key will be name of the file
-    - ./config/pipelineresource.template.yaml
-    - ./config/pipelinerun.template.yaml
+    - ./config/pipelinerun-template.yaml
 - name: docker-registry-config
   files:
     - ./config/config.json

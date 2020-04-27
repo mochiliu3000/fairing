@@ -47,9 +47,6 @@ spec:
   - name: fairing-build-push
     image: gcr.io/kaniko-project/executor:v0.14.0
     # image: ubuntu
-    # env:
-    # - name: "DOCKER_CONFIG"
-    #   value: $(workspaces.docker-registry-config.path)
     command:
     - /kaniko/executor
     - --dockerfile=$(workspaces.fairing-build.path)/$(inputs.params.dockerfile_sub_dir)

@@ -7,18 +7,26 @@ metadata:
     sidecar.istio.io/inject: "false"
 spec:
   inputs:
+    params:
+    - description: The sub directory of the job yaml file
+      name: job_yaml_sub_dir
+      type: string
     resources:
     - name: builtImage
       type: image
     - name: remote_kubeconfig
       type: cluster
+  workspaces:
+  - name: fairing-build
+    description: fairing build files
+    mountPath: /workspace/fairing-build
   steps:
   - name: fairing-job-deploy
     image: bitnami/kubectl:1.18
     command: ["bash"]
     args:
     - "-c"
-    - "kubectl --kubeconfig /workspace/$(inputs.resources.remote_kubeconfig.name)/kubeconfig get pod"   
+    - "kubectl --kubeconfig /workspace/$(inputs.resources.remote_kubeconfig.name)/kubeconfig apply -f $(workspaces.fairing-build.path)/$(inputs.params.job_yaml_sub_dir)"   
     # Need to use root as kubeconfig created has mode 600
     securityContext:
       runAsUser: 0

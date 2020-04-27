@@ -3,7 +3,7 @@ https://github.com/tektoncd/pipeline/blob/master/docs/install.md#installing-tekt
 2. Create local PV to store build context
 `$ kubectl apply -f pv.yaml`
 3. Create pipelineresource of builtImage and remote_kubeconfig
-`$ kubectl apply -f yamls/pipelineresource.yaml`
+`$ kubectl apply -f yamls/config/pipelineresource.template.yaml`
 4. Create build-push tekton task
 `$ kubectl apply -f yamls/task-build-push.yaml`
 5. Create deploy tekton task
@@ -27,3 +27,6 @@ https://github.com/tektoncd/pipeline/blob/master/docs/install.md#installing-tekt
 `$ kubectl delete pipelinerun fairing-build-deploy-pipeline-0`
 12. Generate pipelinerun with kustomization and template
 `$ kustomize build yamls/ | kubectl apply -f -`
+13. Things need to set
+* container args in fairing-job-template.yaml
+* params in pipelinerun-template.yaml

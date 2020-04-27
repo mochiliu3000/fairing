@@ -1,0 +1,4 @@
+# Customize to transform the image name in PipelineResource CRD
+images:
+- path: spec/params/value
+  kind: PipelineResource

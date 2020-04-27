@@ -10,9 +10,11 @@ spec:
     name: fairing-build-deploy-pipeline
   params:  
   - name: "context_sub_dir"
-    value: "build1"
+    value: "build1/context"
   - name: "dockerfile_sub_dir"
-    value: "build1/Dockerfile"
+    value: "build1/context/Dockerfile"
+  - name: "job_yaml_sub_dir"
+    value: "build1/fairing-job.yaml"
   resources:
   # The image and cluster resources that will be used
   - name: builtImage  

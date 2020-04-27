@@ -7,10 +7,10 @@ spec:
     name: fairing-build-push
   inputs:
     params:
-    - name: context_sub_dir
-      value: "build1"
-    - name: dockerfile_sub_dir
-      value: "build1/Dockerfile"
+    - name: "context_sub_dir"
+      value: "build1/context"
+    - name: "dockerfile_sub_dir"
+      value: "build1/context/Dockerfile"
   outputs:
     resources:
     - name: builtImage
@@ -20,9 +20,9 @@ spec:
     - name: fairing-build
       persistentVolumeClaim:
         claimName: fairing-build-pvc
-    - name: docker-config
+    - name: docker-registry-config
       configMap:
-        name: docker-config
+        name: docker-registry-config
         items:
           - key: config.json
             path: config.json
@@ -37,6 +37,9 @@ spec:
   taskRef:
     name: fairing-job-deploy
   inputs:
+    params:
+    - name: "job_yaml_sub_dir"
+    value: "build1/fairing-job.yaml"
     resources:
     - name: builtImage
       resourceRef:
@@ -44,3 +47,7 @@ spec:
     - name: remote_kubeconfig
       resourceRef:
         name: fairing-deploy-kube-config
+  workspaces:
+  - name: fairing-build
+    persistentVolumeClaim:
+      claimName: fairing-build-pvc

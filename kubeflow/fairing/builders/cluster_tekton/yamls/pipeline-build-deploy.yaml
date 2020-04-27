@@ -12,6 +12,10 @@ spec:
     name: dockerfile_sub_dir
     type: string
     default: ""
+  - description: The sub directory of the job yaml file
+    name: job_yaml_sub_dir
+    type: string
+    default: ""
   resources:
   # Pipeline has 1 image resource and 1 cluster resource
   # builtImage - Image name to build and push. e.g. index.docker.io/XXX/fairing-job:XXX
@@ -22,7 +26,7 @@ spec:
     type: cluster
   workspaces:
    # Workspace has 1 volume and 1 configMap to mount
-   # fairing-build - Mounted workspace to store build Kanico context and Dockerfile
+   # fairing-build - Mounted workspace to store build Kanico context, Dockerfile and Job yaml
    # docker-registry-config - Mounted configMap of user's docker config for image push
   - name: fairing-build
   - name: docker-registry-config
@@ -48,12 +52,18 @@ spec:
   - name: fairing-job-deploy
     runAfter:
     - fairing-build-push
+    params:
+    - name: job_yaml_sub_dir
+      value: "$(params.job_yaml_sub_dir)"
     resources:
       inputs:
       - name: builtImage
         resource: builtImage
       - name: remote_kubeconfig
         resource: remote_kubeconfig
+    workspaces:
+    - name: fairing-build
+      workspace: fairing-build
     taskRef:
       name: fairing-job-deploy
       kind: namespaced
