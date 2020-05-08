@@ -7,9 +7,9 @@ Also refer to https://github.com/kubeflow/testing/tree/master/apps-cd
 * Create local PV to store build context
   * `kubectl apply -f pv.yaml`
 * Configure in advance
-  * Container arguments in `config/fairing-job-template.yaml`
-  * Parameters in `config/pipelinerun-template.yaml`
-  * PipelineResource Parameters in `config/pipelineresource-template.yaml`
+  * Container arguments in `yamls/config/fairing-job-template.yaml`
+  * Parameters in `yamls/config/pipelinerun-template.yaml`
+  * PipelineResource Parameters in `yamls/config/pipelineresource-template.yaml`
 
 ## Run
 * Generate and apply pipelinerun with kustomization and template
